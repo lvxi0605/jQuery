@@ -52,8 +52,31 @@
 						get: function(num) {
 							return num == null ? this.toArray() : (num < 0 ? this[this.length + num] : this[num]);
 						},
-						pushStack: function() {
-
+						/**
+						 * 创建一个新的空的jquery对象，并把DOM元素集合放到这个对象中
+						 * @param {Object} elems
+						 * @param {Object} name 产生元素数组elems的jquery方法名
+						 * @param {Object} selector
+						 */
+						pushStack: function(elems,name,selector) {
+							//创建一个新的空的jquery对象
+							var ret = this.constructor();
+							if(jQuery.isArray(elems)){
+								core_push.apply(ret,elems);
+							}else{
+								jQuery.merge(ret,elems);
+							}
+							
+							ret.prevObject = this;
+							
+							ret.context = this.context;
+							
+							if(name==='find'){
+								ret.selector = this.selector +(this.selector?' ':'')+selector;
+							}else if(name){
+								ret.selector = this.selector +'.'+name+'('+selector+')';
+							}
+							return ret;
 						},
 						each: function(callback, args) {
 							return jQuery.each(this, callback, args);
@@ -73,11 +96,14 @@
 						slice: function() {
 
 						},
-						map: function() {
-
+						map: function(callback) {
+							
 						},
+						/**
+						 * 
+						 */
 						end: function() {
-
+							return this.prevObject || this.constructor(null);
 						},
 						push: core_push,
 						sort: [].sort,
@@ -250,6 +276,12 @@
 								}
 							}
 						},
+						/**
+						 * 对elems中的每个元素执行callback方法，并将每个结果放入数组中返回
+						 * @param {Object} elems
+						 * @param {Object} callback
+						 * @param {Object} arg
+						 */
 						map: function(elems, callback, arg) {
 							var value, key, ret = [],
 								i = 0,
@@ -273,7 +305,32 @@
 								}
 							}
 							return ret.concat.apply([], ret);
-						}
+						},
+						/**
+						 * 合并数组，将second（数组或类数组）中的值合并到first中
+						 * @param {Object} first
+						 * @param {Object} second
+						 */
+						merge: function( first, second ) {  
+    						//如果second.length是一个字符串，那么+second.length就是数字了，通过typeof +"123"将返回number  
+    						//如果是+ "xx"那么就会返回0，typeof还是会返回number  
+							var len = +second.length, j = 0,  i = first.length;  
+							
+							//通过i不断的往里面添加，数组长度自动增加  
+							while ( j < len ) {  
+							   first[ i++ ] = second[ j++ ];  
+							}  
+							//在IE<9中，会把NodeList等类数组对象的length转为NaN  
+							if ( len !== len ) {  
+								while ( second[j] !== undefined ) {  
+									first[ i++ ] = second[ j++ ];  
+								}  
+							}  
+							//重新设置数组长度，数组的长度一般是number类型  
+							first.length = i;  
+							return first;  
+						}  
+						
 					});
 
 					return jQuery;
@@ -319,6 +376,11 @@
 			$.each(mapRet, function(v, i) {
 				console.log(v + '---' + i)
 			});
+			
+			//merge
+			console.log($.merge([1,3,5],[2,4]));
+			
+			
 		</script>
 	</body>
 
